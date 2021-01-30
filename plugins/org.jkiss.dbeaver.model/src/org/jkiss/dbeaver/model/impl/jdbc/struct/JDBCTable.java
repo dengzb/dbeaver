@@ -307,7 +307,7 @@ public abstract class JDBCTable<DATASOURCE extends DBPDataSource, CONTAINER exte
 
             protected int getNextUsedParamIndex(Object[] attributeValues, int paramIndex) {
                 paramIndex++;
-                DBSAttributeBase attribute = attributes[paramIndex];
+                DBSAttributeBase attribute = attributes[paramIndex%attributes.length];
                 while (DBUtils.isPseudoAttribute(attribute) || (!allNulls && DBUtils.isNullValue(attributeValues[paramIndex]))) {
                     paramIndex++;
                 }
@@ -352,19 +352,24 @@ public abstract class JDBCTable<DATASOURCE extends DBPDataSource, CONTAINER exte
                 }
                 query.append(")\n\tVALUES ("); //$NON-NLS-1$
                 hasKey = false;
-                for (int i = 0; i < attributes.length; i++) {
-                    DBSAttributeBase attribute = attributes[i];
+                int attriLength = attributes.length;
+                for (int i = 0; i < attributeValues.length; i++) {
+                    DBSAttributeBase attribute = attributes[i % attriLength];
                     if (DBUtils.isPseudoAttribute(attribute) || (!allNulls && DBUtils.isNullValue(attributeValues[i]))) {
                         continue;
                     }
                     if (hasKey) query.append(","); //$NON-NLS-1$
                     hasKey = true;
-
-                    DBDValueHandler valueHandler = handlers[i];
+                    DBDValueHandler valueHandler = handlers[i % attriLength];
                     if (valueHandler instanceof DBDValueBinder) {
                         query.append(((DBDValueBinder) valueHandler) .makeQueryBind(attribute, attributeValues[i]));
                     } else {
                         query.append("?"); //$NON-NLS-1$
+                    }
+                    // To produce input like value (1,2,3,4), (2,3,4,5), (2,4,5,6)
+                    if ((i+1) % attriLength == 0 && i != attributeValues.length-1) {
+                        query.append("), (");
+                        hasKey = false;
                     }
                 }
                 query.append(")"); //$NON-NLS-1$
@@ -383,14 +388,17 @@ public abstract class JDBCTable<DATASOURCE extends DBPDataSource, CONTAINER exte
             @Override
             protected void bindStatement(@NotNull DBDValueHandler[] handlers, @NotNull DBCStatement statement, Object[] attributeValues) throws DBCException {
                 int paramIndex = 0;
-                for (int k = 0; k < handlers.length; k++) {
-                    DBSAttributeBase attribute = attributes[k];
+                for (int k = 0; k < attributeValues.length; k++) {
+                    DBSAttributeBase attribute = attributes[k % attributes.length];
                     if (DBUtils.isPseudoAttribute(attribute) || (!allNulls && DBUtils.isNullValue(attributeValues[k]))) {
                         continue;
                     }
-                    handlers[k].bindValueObject(statement.getSession(), statement, attribute, paramIndex++, attributeValues[k]);
+                    // Use % because attributeValues can be consisted by multiple rows
+                    handlers[k % attributes.length].bindValueObject(statement.getSession(), statement, attribute, paramIndex++, attributeValues[k]);
                 }
             }
+
+
         };
     }
 

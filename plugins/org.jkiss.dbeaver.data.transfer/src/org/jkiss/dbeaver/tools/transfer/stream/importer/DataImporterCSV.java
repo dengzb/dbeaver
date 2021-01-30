@@ -190,13 +190,13 @@ public class DataImporterCSV extends StreamImporterAbstract {
             StreamTransferResultSet resultSet = new StreamTransferResultSet(producerSession, localStatement, entityMapping);
 
             consumer.fetchStart(producerSession, resultSet, -1, -1);
-
             applyTransformHints(resultSet, consumer, properties, PROP_TIMESTAMP_FORMAT, PROP_TIMESTAMP_ZONE);
 
             try (Reader reader = openStreamReader(inputStream, properties)) {
                 try (CSVReader csvReader = openCSVReader(reader, properties)) {
 
                     int maxRows = site.getSettings().getMaxRows();
+
                     int targetAttrSize = entityMapping.getStreamColumns().size();
                     boolean headerRead = false;
                     for (int lineNum = 0; ; ) {

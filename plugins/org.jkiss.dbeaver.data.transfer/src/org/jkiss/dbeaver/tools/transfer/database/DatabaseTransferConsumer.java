@@ -75,6 +75,8 @@ public class DatabaseTransferConsumer implements IDataTransferConsumer<DatabaseC
     // Used in deserialized or directly instantiated consumers
     private DBSDataManipulator localTargetObject;
 
+    private List<Object> accumulatedAttris;
+
     private boolean isPreview;
     private List<Object[]> previewRows;
 
@@ -133,9 +135,16 @@ public class DatabaseTransferConsumer implements IDataTransferConsumer<DatabaseC
     protected List<Object[]> getPreviewRows() {
         return previewRows;
     }
+    protected List<Object> getAccAttris() {
+        return accumulatedAttris;
+    }
+    protected void setAccAttris(List<Object> attris) {
+        this.accumulatedAttris = attris;
+    }
 
     @Override
     public void fetchStart(DBCSession session, DBCResultSet resultSet, long offset, long maxRows) throws DBCException {
+        this.setAccAttris(new ArrayList<Object>());
         try {
             initExporter(session.getProgressMonitor());
         } catch (DBException e) {
@@ -287,13 +296,20 @@ public class DatabaseTransferConsumer implements IDataTransferConsumer<DatabaseC
                     false, false);
             }
         }
-        executeBatch.add(rowValues);
 
         rowsExported++;
-        // No need. monitor is incremented in data reader
-        //session.getProgressMonitor().worked(1);
+        if ((rowsExported & 3) == 0) {
+            executeBatch.add(this.getAccAttris().toArray());
+            // No need. monitor is incremented in data reader
+            //session.getProgressMonitor().worked(1);
+            this.getAccAttris().clear();
 
-        insertBatch(false);
+            insertBatch(false);
+        } else {
+            for (int i = 0;i< rowValues.length;i++) {
+                this.getAccAttris().add(rowValues[i]);
+            }
+        }
     }
 
     private void insertBatch(boolean force) throws DBCException {

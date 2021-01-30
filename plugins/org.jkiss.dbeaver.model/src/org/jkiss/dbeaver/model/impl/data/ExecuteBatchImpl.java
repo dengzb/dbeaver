@@ -122,8 +122,8 @@ public abstract class ExecuteBatchImpl implements DBSDataManipulator.ExecuteBatc
             // We must be aware of nulls because actual insert statements may differ depending on null values.
             // So if row nulls aren't the same as in previous row we need to prepare new statement and restart batch.
             // Quite complicated but works.
-            boolean[] prevNulls = new boolean[attributes.length];
-            boolean[] nulls = new boolean[attributes.length];
+            boolean[] prevNulls = new boolean[attributes.length * 4];
+            boolean[] nulls = new boolean[attributes.length * 4];
             int statementsInBatch = 0;
 
             for (int rowIndex = 0; rowIndex < values.size(); rowIndex++) {
@@ -162,6 +162,8 @@ public abstract class ExecuteBatchImpl implements DBSDataManipulator.ExecuteBatc
                 }
                 try {
                     bindStatement(handlers, statement, rowValues);
+                    log.error(statement.getQueryString());
+                    log.error(rowValues.length);
                     if (actions == null) {
                         if (useBatch) {
                             statement.addToBatch();
