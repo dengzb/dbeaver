@@ -307,7 +307,7 @@ public abstract class JDBCTable<DATASOURCE extends DBPDataSource, CONTAINER exte
 
             protected int getNextUsedParamIndex(Object[] attributeValues, int paramIndex) {
                 paramIndex++;
-                DBSAttributeBase attribute = attributes[paramIndex%attributes.length];
+                DBSAttributeBase attribute = attributes[paramIndex % attributes.length];
                 while (DBUtils.isPseudoAttribute(attribute) || (!allNulls && DBUtils.isNullValue(attributeValues[paramIndex]))) {
                     paramIndex++;
                 }

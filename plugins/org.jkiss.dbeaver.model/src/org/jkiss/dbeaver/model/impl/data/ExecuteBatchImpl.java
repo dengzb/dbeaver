@@ -162,8 +162,6 @@ public abstract class ExecuteBatchImpl implements DBSDataManipulator.ExecuteBatc
                 }
                 try {
                     bindStatement(handlers, statement, rowValues);
-                    log.error(statement.getQueryString());
-                    log.error(rowValues.length);
                     if (actions == null) {
                         if (useBatch) {
                             statement.addToBatch();
