@@ -65,6 +65,7 @@ public class MySQLDataSourceProvider extends JDBCDataSourceProvider implements D
         // This longer timeout is for connections directly in use by a human, who'd prefer MySQL not 
         // kill their connection while they were on a coffee break.
         connectionsProps.put("interactiveClient", "true");
+        connectionsProps.put(MySQLConstants.REWRITE_BATCH_STATEMENT, "true");
         // Auth plugins
 //        connectionsProps.put("authenticationPlugins",
 //            "com.mysql.jdbc.authentication.MysqlClearPasswordPlugin," +
@@ -114,7 +115,6 @@ public class MySQLDataSourceProvider extends JDBCDataSourceProvider implements D
         if (!CommonUtils.isEmpty(connectionInfo.getDatabaseName())) {
             url.append(connectionInfo.getDatabaseName());
         }
-
         return url.toString();
     }
 

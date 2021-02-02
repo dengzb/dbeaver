@@ -298,17 +298,13 @@ public class DatabaseTransferConsumer implements IDataTransferConsumer<DatabaseC
         }
 
         rowsExported++;
+        for (int i = 0;i< rowValues.length;i++) {
+            this.getAccAttris().add(rowValues[i]);
+        }
         if ((rowsExported & 3) == 0) {
             executeBatch.add(this.getAccAttris().toArray());
-            // No need. monitor is incremented in data reader
-            //session.getProgressMonitor().worked(1);
             this.getAccAttris().clear();
-
             insertBatch(false);
-        } else {
-            for (int i = 0;i< rowValues.length;i++) {
-                this.getAccAttris().add(rowValues[i]);
-            }
         }
     }
 
@@ -384,6 +380,10 @@ public class DatabaseTransferConsumer implements IDataTransferConsumer<DatabaseC
     public void fetchEnd(DBCSession session, DBCResultSet resultSet) throws DBCException {
         try {
             if (rowsExported > 0) {
+                if (executeBatch != null) {
+                    executeBatch.add(this.getAccAttris().toArray());
+                    this.getAccAttris().clear();
+                }
                 insertBatch(true);
             }
             if (executeBatch != null) {

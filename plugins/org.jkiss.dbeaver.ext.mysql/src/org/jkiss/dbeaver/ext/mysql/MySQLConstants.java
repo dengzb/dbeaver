@@ -54,6 +54,7 @@ public class MySQLConstants {
     @Deprecated
     public static final String PROP_SSL_CA_CERT = "ssl.ca.cert";
     public static final String PROP_SSL_DEBUG = "ssl.debug";
+    public static final String REWRITE_BATCH_STATEMENT = "rewriteBatchedStatements";
 
     public static final String[] TABLE_TYPES = new String[]{"TABLE", "VIEW", "LOCAL TEMPORARY"};
 
